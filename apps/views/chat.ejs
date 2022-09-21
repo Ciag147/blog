@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <style type="text/css">
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font: 13px Helvetica, Arial; }
+        form { background: #000; padding: 3px; position: fixed; bottom: 20px; right: 60px; width: 90%; }
+        form input { border: 0; padding: 10px; width: 90%; margin-right:.5%; }
+        #conversation { list-style-type: none; margin: 0; padding: 0; }
+        #conversation li { padding: 5px 10px; }
+        #conversation li:nth-child(odd) { background: #eee; }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <ul id="conversation">
+
+        </ul>
+        <form>
+            <input type="text" name="message" id="message">
+            <button class="btn btn-success" id="btn-send">Send</button>
+        </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script> 
+    <script type="text/javascript">
+        var socket = io.connect("http://localhost:3000");
+        socket.on("connect", function(){
+            console.log('User is connecting to server ...');
+
+            var username = prompt('What is your name?'); //lay ten nguoi dung
+            socket.emit('adduser', username); //thong bao den server su kien addUser
+
+        });
+
+        //lang nghe su kien update_message
+        socket.on('update_message', function(data){
+            $('#conversation').append('<li> <b>' + data.sender + ':</b>' + data.message + '</li>');
+        });
+
+        //su kien gui tin nhan
+        $('#btn-send').click(function(e){
+            var message = $('#message').val(); //lay message
+            $('#message').val('');
+
+            if(message.trim().length != 0){
+                socket.emit('send_message', message);
+            }
+        });
+        //khong cho gui form lai sau khi gui tin nhan
+        $('form').submit(function(){
+            return false;
+        })
+
+        // //gui tin nhan khi an enter (enter = 13)
+        // $('#message').keypress(function(e){
+        //     if(e.which == 13){
+        //         $('#btn-send').trigger('click');
+        //     }
+        // })
+
+    </script>
+</body>
+</html>
